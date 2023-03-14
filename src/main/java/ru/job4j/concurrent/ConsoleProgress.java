@@ -7,7 +7,7 @@ public class ConsoleProgress implements Runnable {
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
         progress.interrupt();
     }
@@ -20,7 +20,7 @@ public class ConsoleProgress implements Runnable {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
                 System.out.print("\rLoading.." + process[i % 4]);
             }
