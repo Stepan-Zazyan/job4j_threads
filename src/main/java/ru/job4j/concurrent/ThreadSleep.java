@@ -5,11 +5,11 @@ public class ThreadSleep {
         Thread th = new Thread(
                () -> {
                    try {
-                      for (int i = 0; i < 100; i++) {
+                      for (int i = 0; i <= 100; i++) {
                           System.out.print("\rLoading..." + i + "%");
                           Thread.sleep(1000);
                       }
-                          System.out.println("Loaded");
+                          System.out.println("\rLoaded");
 
                    } catch (InterruptedException e) {
                        e.printStackTrace();
