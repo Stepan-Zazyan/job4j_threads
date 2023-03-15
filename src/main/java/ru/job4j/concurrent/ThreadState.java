@@ -11,16 +11,13 @@ public class ThreadState {
                 }
         );
         System.out.println(first.getName());
-        first.start();
-        while (first.getState() != Thread.State.TERMINATED) {
-            System.out.println("активна нить " + first.getName() + " " + first.getState());
-        }
         System.out.println(second.getName());
+        first.start();
         second.start();
-        while (second.getState() != Thread.State.TERMINATED) {
-            System.out.println("активна нить " + second.getName() + " " + second.getState());
+        while (first.getState() != Thread.State.TERMINATED
+        || second.getState() != Thread.State.TERMINATED) {
+            System.out.println("активна нить " + Thread.currentThread().getName());
         }
-        System.out.println();
         System.out.println("Работа нитей завершена " + System.lineSeparator()
                 + first.getName() + " " + first.getState() + System.lineSeparator()
                 + second.getName() + " " + second.getState());
