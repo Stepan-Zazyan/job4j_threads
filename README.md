@@ -49,3 +49,4 @@ Spring
     Kafka
     Kubernetes
 
+Коммит изменений через терминал
