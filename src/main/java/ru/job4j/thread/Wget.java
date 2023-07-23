@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Wget implements Runnable {
     private final String url;
@@ -19,8 +20,8 @@ public class Wget implements Runnable {
     public void run() {
 
         var startAt = System.currentTimeMillis();
-        var file = new File("tmp.xml");
-        String url = "https://raw.githubusercontent.com/peterarsentev/course_test/master/pom.xml";
+        Path path = Path.of(url).getFileName();
+        var file = new File(String.valueOf(path));
         try (var in = new URL(url).openStream();
              var out = new FileOutputStream(file)) {
             System.out.println("Open connection: " + (System.currentTimeMillis() - startAt) + " ms");
@@ -60,4 +61,5 @@ public class Wget implements Runnable {
         wget.start();
         wget.join();
     }
+
 }
