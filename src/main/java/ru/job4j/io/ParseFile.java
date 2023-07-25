@@ -7,9 +7,7 @@ public class ParseFile implements ContentParser {
     private final File file;
 
     public ParseFile(File file) {
-        synchronized (this) {
             this.file = file;
-        }
     }
 
     @Override
@@ -26,7 +24,7 @@ public class ParseFile implements ContentParser {
         StringBuilder output = new StringBuilder();
         try (InputStream i = new FileInputStream(file)) {
             int data;
-            while ((data = i.read()) > 0) {
+            while ((data = i.read()) != -1) {
                 if (filter.test((char) data)) {
                     output.append((char) data);
                 }
@@ -35,9 +33,5 @@ public class ParseFile implements ContentParser {
             throw new RuntimeException(e);
         }
         return output.toString();
-    }
-
-    public static void main(String[] args) {
-
     }
 }
