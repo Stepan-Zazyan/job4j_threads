@@ -1,14 +1,13 @@
 package ru.job4j.cash;
 
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.Optional;
 
 public class AccountStorage {
     private final HashMap<Integer, Account> accounts = new HashMap<>();
 
     public synchronized boolean add(Account account) {
-        return Objects.equals(account, accounts.putIfAbsent(account.id(), account));
+        return null == accounts.putIfAbsent(account.id(), account);
     }
 
     public synchronized boolean update(Account account) {
@@ -16,7 +15,7 @@ public class AccountStorage {
     }
 
     public synchronized boolean delete(int id) {
-        return Objects.equals(accounts.get(id), accounts.remove(id));
+        return null != accounts.remove(id);
     }
 
     public synchronized Optional<Account> getById(int id) {
@@ -27,12 +26,9 @@ public class AccountStorage {
         boolean res = false;
         Optional<Account> accountFrom = getById(fromId);
         Optional<Account> accountTo = getById(toId);
-        if (accountFrom.isPresent() && accountTo.isPresent()) {
-            int sumFrom = accounts.get(fromId).amount() - amount;
-            if (sumFrom < 0) {
-                throw new IllegalArgumentException("Few money on account");
-            }
-            int sumTo = accounts.get(toId).amount() + amount;
+        int sumFrom = accounts.get(fromId).amount() - amount;
+        int sumTo = accounts.get(toId).amount() + amount;
+        if (accountFrom.isPresent() && accountTo.isPresent() && sumFrom >= 0) {
             update(new Account(fromId, sumFrom));
             update(new Account(toId, sumTo));
             res = true;

@@ -2,7 +2,6 @@ package ru.job4j.cash;
 
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class AccountStorageTest {
 
@@ -45,15 +44,5 @@ class AccountStorageTest {
                 .orElseThrow(() -> new IllegalStateException("Not found account by id = 1"));
         assertThat(firstAccount.amount()).isEqualTo(0);
         assertThat(secondAccount.amount()).isEqualTo(200);
-    }
-    @Test
-    void whenNotEnoughMoney() {
-        var storage = new AccountStorage();
-        storage.add(new Account(1, 100));
-        storage.add(new Account(2, 100));
-        assertThatThrownBy(() -> storage.transfer(1, 2, 110))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Few money on account");
-
     }
 }
