@@ -12,7 +12,6 @@ public class SimpleBlockingQueue<T> {
     @GuardedBy("this")
     private Queue<T> queue = new LinkedList<>();
 
-    //добавляет
     public void offer(T value) {
         synchronized (queue) {
             queue.offer(value);
@@ -20,7 +19,6 @@ public class SimpleBlockingQueue<T> {
         }
     }
 
-    //удаляет
     public T poll() throws InterruptedException {
         T value;
         synchronized (queue) {
