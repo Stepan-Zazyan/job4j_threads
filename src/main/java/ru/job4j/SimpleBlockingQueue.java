@@ -23,12 +23,14 @@ public class SimpleBlockingQueue<T> {
             queue.wait();
         }
         queue.offer(value);
-        lockTop--;
         this.notifyAll();
     }
 
     public synchronized T poll() throws InterruptedException {
         T value;
+        while (queue.isEmpty()) {
+            queue.wait();
+        }
         value = queue.poll();
         lockTop++;
         this.notifyAll();
