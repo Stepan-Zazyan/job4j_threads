@@ -9,10 +9,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CacheTest {
 
-    Map<Integer, Base> mapOrigin = new ConcurrentHashMap<>();
-
     @Test
     void add() {
+        Map<Integer, Base> mapOrigin = new ConcurrentHashMap<>();
         Base base = new Base(1, 0);
         mapOrigin.put(base.getId(), base);
         Cache cache = new Cache();
@@ -22,7 +21,7 @@ class CacheTest {
     }
 
     @Test
-    void updateVersion() throws Exception {
+    void updateVersion() {
         Base base = new Base(1, 0);
         Base baseUpdated = new Base(1, 0);
         Cache cache = new Cache();
