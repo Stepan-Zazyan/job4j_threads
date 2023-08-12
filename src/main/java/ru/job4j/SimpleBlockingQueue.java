@@ -12,7 +12,7 @@ public class SimpleBlockingQueue<T> {
     @GuardedBy("this")
     private final Queue<T> queue = new LinkedList<>();
 
-    private int lockTop;
+    private final int lockTop;
 
     public SimpleBlockingQueue(int lockTop) {
         this.lockTop = lockTop;
@@ -27,12 +27,10 @@ public class SimpleBlockingQueue<T> {
     }
 
     public synchronized T poll() throws InterruptedException {
-        T value;
         while (queue.isEmpty()) {
             queue.wait();
         }
-        value = queue.poll();
-        lockTop++;
+        T value = queue.poll();
         this.notifyAll();
         return value;
     }
