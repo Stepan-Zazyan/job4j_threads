@@ -2,13 +2,16 @@ package ru.job4j;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.IntStream;
+
 import static org.assertj.core.api.Assertions.*;
 
 class SimpleBlockingQueueTest {
 
     @Test
     void commonT() throws InterruptedException {
-        SimpleBlockingQueue<Integer> sbq = new SimpleBlockingQueue<>(10);
+        SimpleBlockingQueue<Integer> sbq = new SimpleBlockingQueue<>();
         int[] list = new int[3];
         Thread producer = new Thread(
                 () -> {
@@ -42,7 +45,7 @@ class SimpleBlockingQueueTest {
     @Test
     void checkInALoop() throws InterruptedException {
         for (int i = 0; i < 10000; i++) {
-            SimpleBlockingQueue<Integer> sbq = new SimpleBlockingQueue<>(10);
+            SimpleBlockingQueue<Integer> sbq = new SimpleBlockingQueue<>();
             int[] list = new int[3];
             Thread producer = new Thread(
                     () -> {
@@ -72,5 +75,34 @@ class SimpleBlockingQueueTest {
             consumer.join();
             assertThat(list[1]).isEqualTo(2);
         }
+    }
+
+    @Test
+    public void whenFetchAllThenGetIt() throws InterruptedException {
+        final CopyOnWriteArrayList<Integer> buffer = new CopyOnWriteArrayList<>();
+        final SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>();
+        Thread producer = new Thread(
+                () -> IntStream.range(0, 7).forEach(
+                        queue.getQueue()::offer
+                )
+        );
+        producer.start();
+        Thread consumer = new Thread(
+                () -> {
+                    while (!queue.getQueue().isEmpty() || !Thread.currentThread().isInterrupted()) {
+                        try {
+                            buffer.add(queue.poll());
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                }
+        );
+        producer.join();
+        consumer.start();
+        consumer.interrupt();
+        consumer.join();
+        assertThat(buffer).containsExactly(0, 1, 2, 3, 4, 5, 6);
     }
 }
