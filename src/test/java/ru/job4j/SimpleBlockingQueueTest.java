@@ -11,7 +11,7 @@ class SimpleBlockingQueueTest {
 
     @Test
     void commonT() throws InterruptedException {
-        SimpleBlockingQueue<Integer> sbq = new SimpleBlockingQueue<>();
+        SimpleBlockingQueue<Integer> sbq = new SimpleBlockingQueue<>(10);
         int[] list = new int[3];
         Thread producer = new Thread(
                 () -> {
@@ -45,7 +45,7 @@ class SimpleBlockingQueueTest {
     @Test
     void checkInALoop() throws InterruptedException {
         for (int i = 0; i < 10000; i++) {
-            SimpleBlockingQueue<Integer> sbq = new SimpleBlockingQueue<>();
+            SimpleBlockingQueue<Integer> sbq = new SimpleBlockingQueue<>(10);
             int[] list = new int[3];
             Thread producer = new Thread(
                     () -> {
@@ -80,7 +80,7 @@ class SimpleBlockingQueueTest {
     @Test
     public void whenFetchAllThenGetIt() throws InterruptedException {
         final CopyOnWriteArrayList<Integer> buffer = new CopyOnWriteArrayList<>();
-        final SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>();
+        final SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(10);
         Thread producer = new Thread(
                 () -> IntStream.range(0, 7).forEach(
                         queue.getQueue()::offer
