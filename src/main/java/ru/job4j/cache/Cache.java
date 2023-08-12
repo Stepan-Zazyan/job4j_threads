@@ -13,7 +13,7 @@ public class Cache {
     public boolean update(Base model) {
         return memory.computeIfPresent(model.getId(), (s, a) -> {
             if (a.getVersion() != model.getVersion()) {
-                throw new OptimisticException("Апдейт не удался!");
+                throw new OptimisticException("Update failed!");
             }
             Base base = new Base(model.getId(), a.getVersion() + 1);
             base.setName(a.getName());

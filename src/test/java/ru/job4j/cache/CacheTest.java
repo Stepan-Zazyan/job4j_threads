@@ -1,10 +1,10 @@
 package ru.job4j.cache;
 
 import org.junit.jupiter.api.Test;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CacheTest {
@@ -38,4 +38,16 @@ class CacheTest {
         cache.delete(base);
         assertTrue(cache.getMemory().isEmpty());
     }
+
+    @Test
+    void checkOptimisticException() {
+        Base base = new Base(1, 0);
+        Base baseUpdated = new Base(1, 1);
+        Cache cache = new Cache();
+        cache.add(base);
+        assertThatThrownBy(() -> cache.update(baseUpdated))
+                .isInstanceOf(OptimisticException.class)
+                .hasMessageContaining("Update failed!");
+    }
+
 }
