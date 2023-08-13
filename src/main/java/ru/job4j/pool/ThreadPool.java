@@ -14,10 +14,12 @@ public class ThreadPool {
         for (int i = 0; i < size; i++) {
             Thread thread = new Thread(() -> {
                 try {
-                    while (!tasks.getQueue().isEmpty()) {
-                        tasks.poll();
+                    while (tasks.getQueue().isEmpty()) {
+                        synchronized (this) {
+                            wait();
+                        }
                     }
-                    System.out.println("tasks.poll(); " + Thread.currentThread().getName());
+                    System.out.println(tasks.poll() + Thread.currentThread().getName() + "отработала в конструкторе");
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -26,9 +28,10 @@ public class ThreadPool {
         }
     }
 
-    public void work(Runnable job) throws InterruptedException {
+    public synchronized void work(Runnable job) throws InterruptedException {
             tasks.offer(job);
-            System.out.println("Did job - offered to tasks " + Thread.currentThread().getName());
+            notifyAll();
+            System.out.println(Thread.currentThread().getName() + " Отработала в методе Work");
     }
 
     public void shutdown() {
@@ -40,11 +43,11 @@ public class ThreadPool {
 
     public static void main(String[] args) throws InterruptedException {
         ThreadPool threadPool = new ThreadPool();
-        threadPool.work(() -> System.out.println("working here " + Thread.currentThread().getName()));
+        Thread.sleep(1000);
         for (Thread x : threadPool.threads) {
             x.start();
-            x.join();
         }
+        threadPool.work(() -> System.out.println("Thread did tasks.offer in method Work" + Thread.currentThread().getName()));
         threadPool.shutdown();
         System.out.println(threadPool.threads);
     }
