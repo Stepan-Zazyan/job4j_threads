@@ -8,47 +8,50 @@ import java.util.List;
 public class ThreadPool {
     private final List<Thread> threads = new LinkedList<>();
     private final SimpleBlockingQueue<Runnable> tasks = new SimpleBlockingQueue<>(10);
+    int size = Runtime.getRuntime().availableProcessors();
 
     public ThreadPool() {
-        int size = Runtime.getRuntime().availableProcessors();
         for (int i = 0; i < size; i++) {
             Thread thread = new Thread(() -> {
                 try {
-                    while (tasks.getQueue().isEmpty()) {
-                        synchronized (this) {
-                            wait();
-                        }
+                    synchronized (this) {
+                        wait();
                     }
-                    System.out.println(tasks.poll() + Thread.currentThread().getName() + "отработала в конструкторе");
+                    while (!tasks.getQueue().isEmpty()
+                                && !Thread.currentThread().isInterrupted()) {
+                            tasks.poll().run();
+                            System.out.println(Thread.currentThread().getName() + " Зашла в конструктор и выполнила работу из tasks");
+                        }
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+                System.out.println(Thread.currentThread().getName() + " Проскочила эксепшн");
             });
+            thread.start();
             threads.add(thread);
         }
     }
 
     public synchronized void work(Runnable job) throws InterruptedException {
+        for (int i = 0; i < size; i++) {
             tasks.offer(job);
-            notifyAll();
-            System.out.println(Thread.currentThread().getName() + " Отработала в методе Work");
+            System.out.println(Thread.currentThread().getName() + " отработал метод work");
+        }
+        notifyAll();
     }
 
-    public void shutdown() {
+    public synchronized void shutdown() {
         for (Thread x : threads) {
-            System.out.println("Thread Interrupted " + Thread.currentThread().getName());
+            System.out.println(x.getName() + " В состоянии интераптед");
             x.interrupt();
         }
     }
 
     public static void main(String[] args) throws InterruptedException {
         ThreadPool threadPool = new ThreadPool();
-        Thread.sleep(1000);
-        for (Thread x : threadPool.threads) {
-            x.start();
-        }
-        threadPool.work(() -> System.out.println("Thread did tasks.offer in method Work" + Thread.currentThread().getName()));
+        threadPool.work(() -> System.out.println(Thread.currentThread().getName() + " Загрузила работу в tasks"));
         threadPool.shutdown();
-        System.out.println(threadPool.threads);
+
     }
 }
+
