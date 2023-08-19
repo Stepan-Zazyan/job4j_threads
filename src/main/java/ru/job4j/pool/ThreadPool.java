@@ -7,23 +7,20 @@ import java.util.List;
 
 public class ThreadPool {
     private final List<Thread> threads = new LinkedList<>();
-    private final SimpleBlockingQueue<Runnable> tasks = new SimpleBlockingQueue<>(10);
-    int size = Runtime.getRuntime().availableProcessors();
+    private static final int SIZE = Runtime.getRuntime().availableProcessors();
+    private final SimpleBlockingQueue<Runnable> tasks = new SimpleBlockingQueue<>(SIZE);
+
 
     public ThreadPool() {
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < SIZE; i++) {
             Thread thread = new Thread(() -> {
                 try {
-                    synchronized (this) {
-                        wait();
+                    while (!Thread.currentThread().isInterrupted()) {
+                        tasks.poll().run();
+                        System.out.println(Thread.currentThread().getName() + " Зашла в конструктор и выполнила работу из tasks");
                     }
-                    while (!tasks.getQueue().isEmpty()
-                                && !Thread.currentThread().isInterrupted()) {
-                            tasks.poll().run();
-                            System.out.println(Thread.currentThread().getName() + " Зашла в конструктор и выполнила работу из tasks");
-                        }
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    Thread.currentThread().interrupt();
                 }
                 System.out.println(Thread.currentThread().getName() + " Проскочила эксепшн");
             });
@@ -33,11 +30,10 @@ public class ThreadPool {
     }
 
     public synchronized void work(Runnable job) throws InterruptedException {
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < 100; i++) {
             tasks.offer(job);
             System.out.println(Thread.currentThread().getName() + " отработал метод work");
         }
-        notifyAll();
     }
 
     public synchronized void shutdown() {
@@ -47,11 +43,31 @@ public class ThreadPool {
         }
     }
 
+
+    public SimpleBlockingQueue<Runnable> getTasks() {
+        return tasks;
+    }
+
     public static void main(String[] args) throws InterruptedException {
         ThreadPool threadPool = new ThreadPool();
+        for (int i = 4; i < 10; i++) {
+            threadPool.threads.add(new Thread(() -> {
+                try {
+                    while (!Thread.currentThread().isInterrupted()) {
+                        threadPool.getTasks().poll().run();
+                        System.out.println(Thread.currentThread().getName() + " Зашла в конструктор и выполнила работу из tasks");
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                System.out.println(Thread.currentThread().getName() + " Проскочила эксепшн");
+            }));
+            threadPool.threads.get(i).start();
+        }
         threadPool.work(() -> System.out.println(Thread.currentThread().getName() + " Загрузила работу в tasks"));
         threadPool.shutdown();
-
     }
+
 }
+
 
