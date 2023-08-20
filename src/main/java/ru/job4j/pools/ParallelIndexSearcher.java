@@ -1,10 +1,9 @@
 package ru.job4j.pools;
 
-import java.util.Arrays;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
-public class ParallelIndexSearcher<T> extends RecursiveTask<int[]> {
+public class ParallelIndexSearcher<T> extends RecursiveTask<Integer> {
 
     private final T[] array;
     private final int from;
@@ -19,33 +18,22 @@ public class ParallelIndexSearcher<T> extends RecursiveTask<int[]> {
     }
 
     @Override
-    protected int[] compute() {
-        if (from == to) {
-            return new int[]{from};
+    protected Integer compute() {
+        if (to - from <= 10) {
+            return new IndexSearch<>().indexSearch(res, array);
         }
         int mid = (from + to) / 2;
-        // создаем задачи для сортировки частей
-        ParallelIndexSearcher leftSort = new ParallelIndexSearcher(array, from, mid, res);
-        ParallelIndexSearcher rightSort = new ParallelIndexSearcher(array, mid + 1, to, res);
-        // производим деление.
-        // оно будет происходить, пока в частях не останется по одному элементу
-        leftSort.fork();
-        rightSort.fork();
-        // объединяем полученные результаты
-        return new IndexSearch().indexSearch(res, array);
+        ParallelIndexSearcher<T> leftIndex = new ParallelIndexSearcher<>(array, from, mid, res);
+        ParallelIndexSearcher<T> rightIndex = new ParallelIndexSearcher<>(array, mid + 1, to, res);
+        leftIndex.fork();
+        rightIndex.fork();
+        Object leftJoin = leftIndex.join();
+        Object rightJoin = rightIndex.join();
+        return Math.max((int) leftJoin, (int) rightJoin);
     }
 
-    public T[] forkIndexSearch(T[] array) {
+    public Integer forkIndexSearch(T[] array) {
         ForkJoinPool forkJoinPool = new ForkJoinPool();
-        return (T[])forkJoinPool.invoke(new ParallelIndexSearcher(array, 0, array.length - 1, 5));
-    }
-
-    public static void main(String[] args) {
-        Object[] array = {1, 4, 6, 23, 5, 8, 4, 4, 5, 0};
-        System.out.println(Arrays.toString(array));
-        Object[] a = new ParallelIndexSearcher(array, 0, array.length - 1, 5).forkIndexSearch(array);
-        System.out.println(Arrays.toString(array));
-        System.out.println(Arrays.toString(a));
-        System.out.println();
+        return forkJoinPool.invoke(new ParallelIndexSearcher<>(array, 0, array.length - 1, res));
     }
 }
