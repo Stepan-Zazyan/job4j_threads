@@ -30,10 +30,7 @@ public class ThreadPool {
     }
 
     public synchronized void work(Runnable job) throws InterruptedException {
-        for (int i = 0; i < 100; i++) {
             tasks.offer(job);
-            System.out.println(Thread.currentThread().getName() + " отработал метод work");
-        }
     }
 
     public synchronized void shutdown() {
