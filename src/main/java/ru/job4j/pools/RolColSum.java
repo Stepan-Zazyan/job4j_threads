@@ -3,48 +3,10 @@ package ru.job4j.pools;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class RolColSum {
-    public static class Sums {
-        private int rowSum = 0;
-        private int colSum = 0;
-
-        public Sums(int rowSum, int colSum) {
-            this.rowSum = rowSum;
-            this.colSum = colSum;
-        }
-
-        public Sums() {
-        }
-
-        @Override
-        public String toString() {
-            return "Sums{"
-                    + "rowSum=" + rowSum
-                    + ", colSum=" + colSum
-                    + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Sums sums = (Sums) o;
-            return rowSum == sums.rowSum && colSum == sums.colSum;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(rowSum, colSum);
-        }
-    }
 
     public static Sums[] asyncSum(int[][] matrix) throws ExecutionException, InterruptedException {
         Sums[] sums = new Sums[matrix.length];
@@ -62,8 +24,8 @@ public class RolColSum {
         return CompletableFuture.supplyAsync(() -> {
             Sums sum = new Sums();
             for (int j = 0; j < matrix[0].length; j++) {
-                sum.rowSum += matrix[rowCol][j];
-                sum.colSum += matrix[j][rowCol];
+                sum.setRowSum(sum.getRowSum() + matrix[rowCol][j]);
+                sum.setColSum(sum.getColSum() + matrix[j][rowCol]);
             }
             return sum;
         });
@@ -74,8 +36,8 @@ public class RolColSum {
         for (int i = 0; i < matrix.length; i++) {
             Sums sum = new Sums();
             for (int j = 0; j < matrix[0].length; j++) {
-                sum.rowSum += matrix[i][j];
-                sum.colSum += matrix[j][i];
+                sum.setRowSum(sum.getRowSum() + matrix[i][j]);
+                sum.setColSum(sum.getColSum() + matrix[j][i]);
             }
             sums[i] = sum;
         }
@@ -90,10 +52,10 @@ public class RolColSum {
         double endLinearCount = System.currentTimeMillis() - startLinearCount;
         System.out.println("LinearCountTime= " + endLinearCount);
         System.out.println(Arrays.toString(linearSum(matrix)));
+
         double startAsyncCount = System.currentTimeMillis();
         asyncSum(matrix);
         double endAsyncCount = System.currentTimeMillis() - startAsyncCount;
         System.out.println("AsyncCountTime= " + endAsyncCount);
-
     }
 }
